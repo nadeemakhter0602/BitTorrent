@@ -25,7 +25,7 @@ class BEncoding:
         byte_data_generator = self.byte_generator(byte_array)
         return self.decode_byte_generator(byte_data_generator)
 
-    def decode_byte_generator(self, byte_data_generator, current_byte = None):
+    def decode_byte_generator(self, byte_data_generator, current_byte=None):
         if current_byte is None:
             current_byte = next(byte_data_generator)
         else:
@@ -49,7 +49,7 @@ class BEncoding:
     def decode_dictionary(self, byte_data_generator):
         dictionary = dict()
         keys = list()
-        current_byte = bytes()
+        current_byte = next(byte_data_generator)
         while current_byte != self.end:
             key = self.decode_byte_generator(byte_data_generator, current_byte).decode()
             current_byte = next(byte_data_generator)
@@ -57,17 +57,16 @@ class BEncoding:
             current_byte = next(byte_data_generator)
             dictionary[key] = value
             keys.append(key)
-        if sorted(keys, key = lambda x : bytes(x, 'utf-8')) != list(dictionary.keys()):
+        if sorted(keys, key=lambda x: bytes(x, 'utf-8')) != list(dictionary.keys()):
             raise Exception('Dictionary keys not sorted')
         return dictionary
 
     def decode_list(self, byte_data_generator):
         list_bytes = list()
-        current_byte = bytes()
+        current_byte = next(byte_data_generator)
         while current_byte != self.end:
             if not current_byte == b'':
-                byte_array = self.decode_byte_generator(
-                    byte_data_generator, current_byte)
+                byte_array = self.decode_byte_generator(byte_data_generator, current_byte)
             else:
                 byte_array = self.decode_byte_generator(byte_data_generator)
             current_byte = next(byte_data_generator)

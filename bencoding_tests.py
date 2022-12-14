@@ -45,6 +45,16 @@ class BEncodingTests(unittest.TestCase):
         self.assertEqual(isinstance(result, dict), True)
         self.assertEqual(result, {'a': 123, 'b': {'ba': b'foo', 'bb': b'bar'}, 'c': [[b'a', b'b'], b'z']})
 
+    def test_empty_list(self):
+        result = self.bencoding.decode(b'le')
+        self.assertEqual(isinstance(result, list), True)
+        self.assertEqual(result, [])
+
+    def test_empty_dictionary(self):
+        result = self.bencoding.decode(b'de')
+        self.assertEqual(isinstance(result, dict), True)
+        self.assertEqual(result, dict())
+
     def test_encoding_number(self):
         result = self.bencoding.encode(123)
         self.assertEqual(b'i123e', result)
