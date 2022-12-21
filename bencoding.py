@@ -19,7 +19,7 @@ class BEncoding:
 
     def byte_generator(self, byte_array):
         for byte in byte_array:
-            yield bytes(chr(byte), 'utf-8')
+            yield byte.to_bytes(1, 'big')
 
     def decode(self, byte_array):
         byte_data_generator = self.byte_generator(byte_array)
