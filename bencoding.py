@@ -15,7 +15,7 @@ class BEncoding:
 
         with open(path, 'rb') as f:
             file_bytes = f.read()
-            self.decode(file_bytes)
+            return self.decode(file_bytes)
 
     def byte_generator(self, byte_array):
         for byte in byte_array:
