@@ -7,7 +7,7 @@ import secrets
 def announce(torrent_file, peer_id, port, uploaded, downloaded, left, event, compact):
     trackers = torrent_file['announce']
     info_hash = bencoding.encode(torrent_file['info'])
-    hashing = hashlib.new('sha1')
+    hashing = hashlib.new('sha1', usedforsecurity=False)
     hashing.update(info_hash)
     digest = hashing.digest()
     query_params = {
