@@ -26,6 +26,7 @@ def announce(torrent_file, peer_id, port, uploaded, downloaded, left, event, com
     except Exception as e:
         print(str(e))
 
+
 if __name__ == '__main__':
     peer_id = bytes.fromhex(secrets.token_hex(20))
     bencoding = BEncoding()
@@ -36,9 +37,14 @@ if __name__ == '__main__':
     compact = '1'
     uploaded = 0
     downloaded = 0
-
-    tracker_response = announce(torrent_file, peer_id,
-                                port, uploaded, downloaded, length, event, compact)
+    tracker_response = announce(torrent_file,
+                                peer_id,
+                                port, 
+                                uploaded, 
+                                downloaded,
+                                length, 
+                                event, 
+                                compact)
     peer_bytes = tracker_response['peers']
     peer_list = []
     for i in range(0, len(peer_bytes), 6):
