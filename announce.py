@@ -27,6 +27,20 @@ def announce(torrent_file, peer_id, port, uploaded, downloaded, left, event, com
         print(str(e))
 
 
+def get_peers(tracker_response):
+    peer_bytes = tracker_response['peers']
+    peer_list = []
+    for i in range(0, len(peer_bytes), 6):
+        start = i
+        end = i + 6
+        peer = peer_bytes[start:end]
+        first_4 = [str(byte) for byte in peer[:4]]
+        ipaddr = '.'.join(first_4)
+        port = int.from_bytes(peer[4::], "big")
+        peer_list.append((ipaddr, port))
+    return peer_list
+
+
 if __name__ == '__main__':
     peer_id = bytes.fromhex(secrets.token_hex(20))
     bencoding = BEncoding()
@@ -39,19 +53,11 @@ if __name__ == '__main__':
     downloaded = 0
     tracker_response = announce(torrent_file,
                                 peer_id,
-                                port, 
-                                uploaded, 
+                                port,
+                                uploaded,
                                 downloaded,
-                                length, 
-                                event, 
+                                length,
+                                event,
                                 compact)
-    peer_bytes = tracker_response['peers']
-    peer_list = []
-    for i in range(0, len(peer_bytes), 6):
-        start = i
-        end = i + 6
-        peer = peer_bytes[start:end]
-        first_4 = [byte for byte in peer[:4]]
-        last_2 = int.from_bytes(peer[4::], "big")
-        peer_list.append((first_4, last_2))
+    peer_list = get_peers(tracker_response)
     print(peer_list)
