@@ -2,18 +2,18 @@ from bencoding import BEncoding
 import hashlib
 import requests
 import secrets
+from peer import Peer
+from torrent import Torrent
 
 
-def announce(torrent_file, peer_id, port, uploaded, downloaded, left, event, compact):
-    trackers = torrent_file['announce']
-    info_hash = bencoding.encode(torrent_file['info'])
-    hashing = hashlib.new('sha1', usedforsecurity=False)
-    hashing.update(info_hash)
-    digest = hashing.digest()
+def announce(torrent, peer, uploaded, downloaded, left, event, compact):
+    bencoding = BEncoding()
+    trackers = torrent.torrent_file['announce']
+    info_hash = torrent.info_hash
     query_params = {
-        'info_hash': digest,
-        'peer_id': peer_id,
-        'port': port,
+        'info_hash': info_hash,
+        'peer_id': peer.peer_id,
+        'port': peer.port,
         'uploaded': uploaded,
         'downloaded': downloaded,
         'left': left,
@@ -42,18 +42,16 @@ def get_peers(tracker_response):
 
 
 if __name__ == '__main__':
-    peer_id = bytes.fromhex(secrets.token_hex(20))
     bencoding = BEncoding()
-    torrent_file = bencoding.decode_file('test.torrent')
-    length = str(torrent_file['info']['length'])
+    peer = Peer('6881')
+    torrent = Torrent('test.torrent', './')
+    length = torrent.length
     event = 'started'
-    port = '6881'
     compact = '1'
     uploaded = 0
     downloaded = 0
-    tracker_response = announce(torrent_file,
-                                peer_id,
-                                port,
+    tracker_response = announce(torrent,
+                                peer,
                                 uploaded,
                                 downloaded,
                                 length,
