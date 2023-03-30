@@ -26,6 +26,10 @@ class Connection:
             deserialized = self.deserialize_handshake(recv)
             print("Deserialized response :", deserialized)
             protocol_identifier, pstr, reserved_bytes, info_hash, peer_id = deserialized
+            if info_hash == self.torrent.info_hash:
+                return "Handshake Completed with Peer with ID %s" % peer_id
+            else:
+                return "Handshake Failed with Peer with ID %s" % peer_id
         except Exception as err:
             print("Connection failed due to error :")
             traceback.print_exc()
@@ -70,6 +74,6 @@ if __name__ == '__main__':
     for peer in peer_list:
         print()
         connection = Connection(my_peer, torrent)
-        connection.send_handshake(peer)
+        print(connection.send_handshake(peer))
         connection.close_connection()
         print()
