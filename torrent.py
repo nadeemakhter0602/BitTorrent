@@ -11,4 +11,6 @@ class Torrent:
         hashing = hashlib.new('sha1', usedforsecurity=False)
         hashing.update(info_hash)
         self.info_hash = hashing.digest()
-        self.length = str(self.torrent_file['info']['length'])
+        self.length = self.torrent_file['info']['length']
+        self.name = self.torrent_file['info']['name']
+        self.piece_length = self.torrent_file['info']['piece length']
