@@ -13,11 +13,28 @@ class Connection:
         self.protocol_identifier = b'\x13'
         self.pstr = b'BitTorrent protocol'
         self.reserved_bytes = b'\x00\x00\x00\x00\x00\x00\x00\x00'
+        self.msg_choke = 0
+        self.msg_unchoke = 1
+        self.msg_interested = 2
+        self.msg_not_interested = 3
+        self.msg_have = 4
+        self.msg_bitfield = 5
+        self.msg_request = 6
+        self.msg_piece = 7
+        self.msg_cancel = 8
 
-    def send_handshake(self, peer):
+    def connect_peer(self, peer):
         try:
             print("Attempting to connect to %s" % str(peer))
             self.conn.connect(peer)
+            print("Successfully connected to %s" % str(peer))
+        except Exception as err:
+            print("Connection failed due to error :")
+            traceback.print_exc()
+            pass
+
+    def send_handshake(self, peer):
+        try:
             handshake = self.serialize_handshake()
             print("Sending handshake :", handshake)
             self.conn.send(handshake)
@@ -27,11 +44,11 @@ class Connection:
             print("Deserialized response :", deserialized)
             protocol_identifier, pstr, reserved_bytes, info_hash, peer_id = deserialized
             if info_hash == self.torrent.info_hash:
-                return "Handshake Completed with Peer with ID %s" % peer_id
+                print("Handshake Completed, Peer ID is %s" % peer_id)
             else:
-                return "Handshake Failed with Peer with ID %s" % peer_id
+                print("Invalid Info Hash received from Peer %s with ID %s" % (str(peer), peer_id))
         except Exception as err:
-            print("Connection failed due to error :")
+            print("Handshake failed due to error :")
             traceback.print_exc()
             pass
 
@@ -74,6 +91,8 @@ if __name__ == '__main__':
     for peer in peer_list:
         print()
         connection = Connection(my_peer, torrent)
-        print(connection.send_handshake(peer))
+        connection.connect_peer(peer)
+        print()
+        connection.send_handshake(peer)
         connection.close_connection()
         print()
