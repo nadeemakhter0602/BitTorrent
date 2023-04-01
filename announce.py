@@ -39,23 +39,3 @@ def get_peers(tracker_response):
         port = int.from_bytes(peer[4::], "big")
         peer_list.append((ipaddr, port))
     return peer_list
-
-
-if __name__ == '__main__':
-    bencoding = BEncoding()
-    peer = Peer('6881')
-    torrent = Torrent('test.torrent', './')
-    length = torrent.length
-    event = 'started'
-    compact = '1'
-    uploaded = 0
-    downloaded = 0
-    tracker_response = announce(torrent,
-                                peer,
-                                uploaded,
-                                downloaded,
-                                length,
-                                event,
-                                compact)
-    peer_list = get_peers(tracker_response)
-    print(peer_list)

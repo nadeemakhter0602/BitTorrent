@@ -127,30 +127,3 @@ class Connection:
         info_hash = conn.recv(20)
         peer_id = conn.recv(20)
         return protocol_identifier, pstr, reserved_bytes, info_hash, peer_id
-
-
-if __name__ == '__main__':
-    client = Peer('6881')
-    torrent = Torrent('test.torrent', './')
-    length = torrent.length
-    event = 'started'
-    compact = '1'
-    uploaded = 0
-    downloaded = 0
-    tracker_response = announce.announce(torrent,
-                                         client,
-                                         uploaded,
-                                         downloaded,
-                                         length,
-                                         event,
-                                         compact)
-    peer_list = announce.get_peers(tracker_response)
-    for peer in peer_list:
-        peer = Peer(ipaddr=peer[0], port=peer[1])
-        print()
-        connection = Connection(client, peer, torrent)
-        connection.connect_peer()
-        print()
-        connection.send_handshake()
-        connection.close_connection()
-        print()
