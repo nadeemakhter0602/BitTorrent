@@ -14,3 +14,6 @@ class Torrent:
         self.length = self.torrent_file['info']['length']
         self.name = self.torrent_file['info']['name']
         self.piece_length = self.torrent_file['info']['piece length']
+        pieces = self.torrent_file['info']['pieces']
+        pieces_len = len(pieces)
+        self.pieces = [pieces[start:start+20] for start in range(0, pieces_len, 20)]
