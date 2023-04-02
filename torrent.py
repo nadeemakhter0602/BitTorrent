@@ -6,7 +6,7 @@ import requests
 
 
 class Torrent:
-    def __init__(self, name, location):
+    def __init__(self, name, location, client):
         self.bencoding = BEncoding()
         self.torrent_file = self.bencoding.decode_file(os.path.join(location, name))
         info_hash = self.bencoding.encode(self.torrent_file['info'])
@@ -21,10 +21,23 @@ class Torrent:
         pieces_len = len(pieces)
         self.pieces = [pieces[start:start+20]
                        for start in range(0, pieces_len, 20)]
+        self.uploaded = 0
+        self.downloaded = 0
+        self.event = 'started'
+        self.compact = '1'
+        self.left = self.length
+        self.client = client
 
-    def announce(self, torrent, peer_id, port, uploaded, downloaded, left, event, compact):
+    def announce(self):
         trackers = self.trackers
         info_hash = self.info_hash
+        peer_id = self.client.peer_id
+        port = self.client.port
+        uploaded = self.uploaded
+        downloaded = self.downloaded
+        left = self.left
+        event = self.event
+        compact = self.compact
         query_params = {
             'info_hash': info_hash,
             'peer_id': peer_id,
