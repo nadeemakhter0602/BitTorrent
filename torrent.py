@@ -21,12 +21,22 @@ class Torrent:
         pieces_len = len(pieces)
         self.pieces = [pieces[start:start+20]
                        for start in range(0, pieces_len, 20)]
+        self.pieces_num = len(self.pieces)
+        self.validate_piece_length()
         self.uploaded = 0
         self.downloaded = 0
         self.event = 'started'
         self.compact = '1'
         self.left = self.length
         self.client = client
+
+    def validate_piece_length(self):
+        pieces_num = self.length // self.piece_length
+        pieces_num += 0 if self.length % self.piece_length == 0 else 1
+        if self.pieces_num == pieces_num:
+            return True
+        else:
+            raise Exception('Not enough verification hashes for all pieces, torrent loading failed')
 
     def announce(self):
         trackers = self.trackers
