@@ -1,7 +1,4 @@
-import announce
 import socket
-from torrent import Torrent
-from peer import Peer
 import traceback
 
 
