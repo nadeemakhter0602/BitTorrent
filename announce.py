@@ -1,19 +1,15 @@
 from bencoding import BEncoding
-import hashlib
+import traceback
 import requests
-import secrets
-from peer import Peer
-from torrent import Torrent
 
-
-def announce(torrent, peer, uploaded, downloaded, left, event, compact):
+def announce(torrent, client, uploaded, downloaded, left, event, compact):
     bencoding = BEncoding()
-    trackers = torrent.torrent_file['announce']
+    trackers = torrent.trackers
     info_hash = torrent.info_hash
     query_params = {
         'info_hash': info_hash,
-        'peer_id': peer.peer_id,
-        'port': peer.port,
+        'peer_id': client.peer_id,
+        'port': client.port,
         'uploaded': uploaded,
         'downloaded': downloaded,
         'left': left,
@@ -21,11 +17,27 @@ def announce(torrent, peer, uploaded, downloaded, left, event, compact):
         'compact': compact
     }
     try:
-        response = requests.get(trackers, params=query_params)
-        return bencoding.decode(response.content)
+        responses = []
+        if isinstance(trackers, list):
+            for tracker in trackers:
+                response = requests.get(tracker, params=query_params)
+                response = bencoding.decode(response.content)
+                responses.append(response)
+        else:
+            response = requests.get(trackers, params=query_params)
+            response =  bencoding.decode(response.content)
+            responses.append(response)
+        return responses
     except Exception as e:
-        print(str(e))
+        print("Announce failed due to error :")
+        traceback.print_exc()
+        pass
 
+def get_peers_list(tracker_responses):
+    peer_list = []
+    for tracker_response in tracker_responses:
+        peer_list.extend(get_peers(tracker_response))
+    return peer_list
 
 def get_peers(tracker_response):
     peer_bytes = tracker_response['peers']
