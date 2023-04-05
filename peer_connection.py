@@ -10,7 +10,10 @@ class Connection:
         self.torrent = torrent
         self.conn = socket.socket()
         self.is_connected = False
-        self.is_choked = True
+        self.am_choking = True
+        self.am_interested = False
+        self.peer_choking = True
+        self.peer_interested = False
         self.handshake_done = False
         self.protocol_identifier = b'\x13'
         self.pstr = b'BitTorrent protocol'
@@ -33,13 +36,13 @@ class Connection:
             if not self.handshake_done:
                 print("No handshake completed with peer")
                 return
-            if self.is_choked:
+            if self.am_choking:
                 print("Choked by other peer, waiting for unchoke message")
                 length, msg_id, payload = self.deserialize_message()
                 if not (length == 1 and msg_id == 1):
                     print("Did not receive unchoke message")
                     return
-            self.is_choked = False
+            self.am_choking = False
             print("Received unchoke message, sending requested message")
             message = self.serialize_message(msg_id, payload)
             self.conn.send(message)
