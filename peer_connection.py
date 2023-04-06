@@ -28,6 +28,17 @@ class Connection:
         self.msg_piece = 7
         self.msg_cancel = 8
 
+    def recv(self, size):
+        recv_bytes_len = 0
+        total_bytes = b''
+        while recv_bytes_len < size:
+            recv_bytes = self.conn.recv(size - recv_bytes_len)
+            if recv_bytes == b'':
+                raise RuntimeError("Connection Broken")
+            total_bytes += recv_bytes
+            recv_bytes_len += len(recv_bytes)
+        return total_bytes
+
     def send_message(self, msg_id, payload=b''):
         if not self.is_connected:
             raise Exception("No peer connected")
@@ -50,16 +61,16 @@ class Connection:
 
     def deserialize_message(self):
         conn = self.conn
-        length = conn.recv(4)
+        length = self.recv(4)
         length = int.from_bytes(length, 'big')
         if length <= 0:
             return length, None, b''
-        msg_id = conn.recv(1)
+        msg_id = self.recv(1)
         msg_id = int.from_bytes(msg_id, 'big')
         payload_len = length - 1
         if payload_len <= 0:
             return length, msg_id, b''
-        payload = conn.recv(payload_len)
+        payload = self.recv(payload_len)
         if payload_len == len(payload):
             return length, msg_id, payload
         else:
@@ -107,9 +118,9 @@ class Connection:
 
     def deserialize_handshake(self):
         conn = self.conn
-        protocol_identifier = conn.recv(1)
-        pstr = conn.recv(19)
-        reserved_bytes = conn.recv(8)
-        info_hash = conn.recv(20)
-        peer_id = conn.recv(20)
+        protocol_identifier = self.recv(1)
+        pstr = self.recv(19)
+        reserved_bytes = self.recv(8)
+        info_hash = self.recv(20)
+        peer_id = self.recv(20)
         return protocol_identifier, pstr, reserved_bytes, info_hash, peer_id
