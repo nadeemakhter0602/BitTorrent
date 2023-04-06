@@ -56,16 +56,19 @@ class Connection:
             return length, None, None
         msg_id = conn.recv(1)
         msg_id = int.from_bytes(msg_id, 'big')
-        payload_len = length - 5
+        payload_len = length - 1
         if payload_len <= 0:
             return length, msg_id, None
         payload = conn.recv(payload_len)
-        return length, msg_id, payload
+        if payload_len == len(payload):
+            return length, msg_id, payload
+        else:
+            raise Exception("Expected payload length and received payload length is different")
 
     def serialize_message(self, msg_id, payload):
         msg_id = msg_id.to_bytes(1, 'big')
         payload = msg_id + payload
-        length = len(payload)
+        length = len(payload) - 1
         payload = length.to_bytes(4, 'big') + payload
         return payload
 
