@@ -28,7 +28,7 @@ class Connection:
         self.msg_piece = 7
         self.msg_cancel = 8
 
-    def send_message(self, msg_id, payload):
+    def send_message(self, msg_id, payload=b''):
         if not self.is_connected:
             raise Exception("No peer connected")
         if not self.handshake_done:
