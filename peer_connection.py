@@ -53,12 +53,12 @@ class Connection:
         length = conn.recv(4)
         length = int.from_bytes(length, 'big')
         if length <= 0:
-            return length, None, None
+            return length, None, b''
         msg_id = conn.recv(1)
         msg_id = int.from_bytes(msg_id, 'big')
         payload_len = length - 1
         if payload_len <= 0:
-            return length, msg_id, None
+            return length, msg_id, b''
         payload = conn.recv(payload_len)
         if payload_len == len(payload):
             return length, msg_id, payload
