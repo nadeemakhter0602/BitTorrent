@@ -29,30 +29,24 @@ class Connection:
         self.msg_cancel = 8
 
     def send_message(self, msg_id, payload):
-        try:
-            if not self.is_connected:
-                print("No peer connected")
-                return
-            if not self.handshake_done:
-                print("No handshake completed with peer")
-                return
-            if self.am_choking:
-                print("Choked by other peer, waiting for unchoke message")
-                length, msg_id, payload = self.deserialize_message()
-                if not (length == 1 and msg_id == 1):
-                    print("Did not receive unchoke message")
-                    return
-            self.am_choking = False
-            print("Received unchoke message, sending requested message")
-            message = self.serialize_message(msg_id, payload)
-            self.conn.send(message)
-            deserialized = self.deserialize_message()
-            print("Deserialized response :", deserialized)
-            length, msg_id, payload = deserialized
-        except:
-            print("Sending message failed due to error :")
-            traceback.print_exc()
-            pass
+        if not self.is_connected:
+            raise Exception("No peer connected")
+        if not self.handshake_done:
+            raise Exception("No handshake completed with peer")
+        message = self.serialize_message(msg_id, payload)
+        self.conn.send(message)
+        deserialized = self.deserialize_message()
+        length, msg_id, payload = deserialized
+        return length, msg_id, payload
+
+    def receive_bitfield(self):
+        if not self.is_connected:
+            raise Exception("No peer connected")
+        if not self.handshake_done:
+            raise Exception("No handshake completed with peer")
+        deserialized = self.deserialize_message()
+        length, msg_id, payload = deserialized
+        return length, msg_id, payload
 
     def deserialize_message(self):
         conn = self.conn
@@ -76,40 +70,29 @@ class Connection:
         return payload
 
     def connect_peer(self):
-        try:
-            print("Attempting to connect to %s" % str(self.ip_port))
-            self.conn.connect(self.ip_port)
-            self.is_connected = True
-            print("Successfully connected to %s" % str(self.ip_port))
-        except Exception as err:
-            print("Connection failed due to error :")
-            traceback.print_exc()
-            pass
+        self.conn.connect(self.ip_port)
+        self.is_connected = True
+        return self.is_connected
 
     def send_handshake(self):
-        try:
-            if not self.is_connected:
-                print("No peer connected")
-                return
-            handshake = self.serialize_handshake()
-            print("Sending handshake :", handshake)
-            self.conn.send(handshake)
-            deserialized = self.deserialize_handshake()
-            print("Deserialized response :", deserialized)
-            protocol_identifier, pstr, reserved_bytes, info_hash, peer_id = deserialized
-            self.peer.peer_id = peer_id
-            if info_hash == self.torrent.info_hash:
-                print("Handshake Completed, Peer ID is %s" % peer_id)
-                self.handshake_done = True
-            else:
-                print("Invalid Info Hash received from Peer %s with ID %s" % (str(self.ip_port), peer_id))
-        except Exception as err:
-            print("Handshake failed due to error :")
-            traceback.print_exc()
-            pass
+        if not self.is_connected:
+            raise Exception("No peer connected")
+        handshake = self.serialize_handshake()
+        self.conn.send(handshake)
+        deserialized = self.deserialize_handshake()
+        protocol_identifier, pstr, reserved_bytes, info_hash, peer_id = deserialized
+        self.peer.peer_id = peer_id
+        if info_hash == self.torrent.info_hash:
+            self.handshake_done = True
+            return self.handshake_done
+        else:
+            raise Exception("Invalid Info Hash received from Peer %s with ID %s" % (str(self.ip_port), peer_id))
+        return self.handshake_done
 
     def close_connection(self):
         self.conn.close()
+        self.is_connected = False
+        return self.is_connected
 
     def serialize_handshake(self):
         handshake = self.protocol_identifier
