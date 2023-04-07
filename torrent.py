@@ -40,7 +40,8 @@ class Torrent:
         announce = self.torrent_file.get('announce', [])
         if not announce:
             raise Exception("No trackers found in torrent")
-        trackers.append(announce)
+        if announce.startswith(b'http'):
+            trackers.append(announce)
         announce_list = self.torrent_file.get('announce-list', [])
         while announce_list:
             element = announce_list.pop()
@@ -48,7 +49,10 @@ class Torrent:
                 while element:
                     announce_list.append(element.pop())
             else:
-                trackers.append(element)
+                if element.startswith(b'http'):
+                    trackers.append(element)
+        if not trackers:
+            raise Exception("No HTTP trackers found")
         return trackers
 
     def validate_piece_length(self):
