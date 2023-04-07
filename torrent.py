@@ -9,11 +9,8 @@ class Torrent:
     def __init__(self, name, location, client):
         self.bencoding = BEncoding()
         self.torrent_file = self.bencoding.decode_file(os.path.join(location, name))
-        info_hash = self.bencoding.encode(self.torrent_file['info'])
-        hashing = hashlib.new('sha1', usedforsecurity=False)
-        hashing.update(info_hash)
-        self.info_hash = hashing.digest()
-        self.trackers = self.torrent_file['announce']
+        self.info_hash = self.get_info_hash()
+        self.trackers = self.get_trackers()
         self.length = self.torrent_file['info']['length']
         self.name = self.torrent_file['info']['name']
         self.piece_length = self.torrent_file['info']['piece length']
@@ -31,6 +28,28 @@ class Torrent:
         self.compact = '1'
         self.left = self.length
         self.client = client
+
+    def get_info_hash(self):
+        info_hash = self.bencoding.encode(self.torrent_file['info'])
+        hashing = hashlib.new('sha1', usedforsecurity=False)
+        hashing.update(info_hash)
+        return hashing.digest()
+
+    def get_trackers(self):
+        trackers = []
+        announce = self.torrent_file.get('announce', [])
+        if not announce:
+            raise Exception("No trackers found in torrent")
+        trackers.append(announce)
+        announce_list = self.torrent_file.get('announce-list', [])
+        while announce_list:
+            curr = announce_list.pop()
+            if isinstance(curr, list):
+                if curr:
+                    announce_list.append(curr.pop())
+            else:
+                trackers.append(curr)
+        return trackers
 
     def validate_piece_length(self):
         pieces_num = self.length // self.piece_length
@@ -62,13 +81,8 @@ class Torrent:
         }
         try:
             responses = []
-            if isinstance(trackers, list):
-                for tracker in trackers:
-                    response = requests.get(tracker, params=query_params)
-                    response = self.bencoding.decode(response.content)
-                    responses.append(response)
-            else:
-                response = requests.get(trackers, params=query_params)
+            for tracker in trackers:
+                response = requests.get(tracker, params=query_params)
                 response = self.bencoding.decode(response.content)
                 responses.append(response)
             return responses
