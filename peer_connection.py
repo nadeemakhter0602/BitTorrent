@@ -57,6 +57,8 @@ class Connection:
             raise Exception("No handshake completed with peer")
         deserialized = self.deserialize_message()
         length, msg_id, payload = deserialized
+        if msg_id != 5:
+            raise Exception("No Bitfield received")
         return length, msg_id, payload
 
     def deserialize_message(self):
