@@ -43,12 +43,12 @@ class Torrent:
         trackers.append(announce)
         announce_list = self.torrent_file.get('announce-list', [])
         while announce_list:
-            curr = announce_list.pop()
-            if isinstance(curr, list):
-                if curr:
-                    announce_list.append(curr.pop())
+            element = announce_list.pop()
+            if isinstance(element, list):
+                while element:
+                    announce_list.append(element.pop())
             else:
-                trackers.append(curr)
+                trackers.append(element)
         return trackers
 
     def validate_piece_length(self):
