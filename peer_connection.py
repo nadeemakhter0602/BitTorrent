@@ -46,20 +46,34 @@ class Connection:
             raise Exception("No handshake completed with peer")
         message = self.serialize_message(msg_id, payload)
         self.conn.send(message)
+        return True
+
+    def receive_message(self):
         deserialized = self.deserialize_message()
         length, msg_id, payload = deserialized
         return length, msg_id, payload
+
+    def send_choke(self):
+        return self.send_message(0)
+
+    def send_unchoke(self):
+        return self.send_message(1)
+
+    def send_interested(self):
+        return self.send_message(2)
+
+    def send_not_interested(self):
+        return self.send_message(3)
 
     def receive_bitfield(self):
         if not self.is_connected:
             raise Exception("No peer connected")
         if not self.handshake_done:
             raise Exception("No handshake completed with peer")
-        deserialized = self.deserialize_message()
-        length, msg_id, payload = deserialized
+        length, msg_id, payload = self.receive_message()
         if msg_id != 5:
-            raise Exception("No Bitfield received")
-        return length, msg_id, payload
+            raise Exception("No bitfield received")
+        return payload
 
     def deserialize_message(self):
         conn = self.conn
