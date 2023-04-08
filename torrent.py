@@ -3,6 +3,7 @@ import os
 from bencoding import BEncoding
 import traceback
 import requests
+from bitfield import Bitfield
 
 
 class Torrent:
@@ -20,13 +21,19 @@ class Torrent:
                        for start in range(0, pieces_len, 20)]
         self.pieces_num = len(self.pieces)
         self.validate_piece_length()
-        self.piece_idx = 0
+        self.bitfield = self.create_bitfield()
         self.uploaded = 0
         self.downloaded = 0
         self.event = 'started'
         self.compact = '1'
         self.left = self.length
         self.client = client
+
+    def create_bitfield(self):
+        bits = b'\x00' * self.pieces_num // 8
+        if not self.pieces_num % 8 == 0:
+            bits += b'\x00'
+        return Bitfield(bits)
 
     def get_info_hash(self):
         info_hash = self.bencoding.encode(self.torrent_file['info'])
