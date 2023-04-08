@@ -95,7 +95,7 @@ class Connection:
     def serialize_message(self, msg_id, payload):
         msg_id = msg_id.to_bytes(1, 'big')
         payload = msg_id + payload
-        length = len(payload) - 1
+        length = len(payload)
         payload = length.to_bytes(4, 'big') + payload
         return payload
 
