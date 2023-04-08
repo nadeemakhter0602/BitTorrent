@@ -21,7 +21,6 @@ class Torrent:
         self.pieces_num = len(self.pieces)
         self.validate_piece_length()
         self.piece_idx = 0
-        self.piece_offset = 0
         self.uploaded = 0
         self.downloaded = 0
         self.event = 'started'
