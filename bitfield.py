@@ -1,6 +1,6 @@
 class Bitfield:
     def __init__(self, bits):
-        self.bits = bits
+        self.bits = bytearray(bits)
 
     def has_piece(self, index):
         byte_index = index // 8
