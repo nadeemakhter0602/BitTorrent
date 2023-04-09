@@ -38,8 +38,8 @@ class Torrent:
 
     def create_file(self):
         if not os.path.exists(self.name):
-            with open(self.name, 'wb') as fd:
-                fd.write(b'')
+            fd = open(self.name, 'wb')
+            fd.close()
         return open(self.name, 'rb+')
 
     def write_to_file(self, piece_idx, piece):
