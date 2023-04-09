@@ -105,15 +105,18 @@ class Client:
                 connection.am_interested = True
                 connection.send_interested()
                 for i in range(self.requests_per_peer):
-                    piece_idx = self.q.get(block=False)
-                    result = self.process(piece_idx, connection, bitfield)
-                    if not result:
-                        self.q.put(piece_idx, block=False)
+                    while True:
+                        try:
+                            piece_idx = self.q.get(block=False)
+                            result = self.process(piece_idx, connection, bitfield)
+                            if not result:
+                                self.q.put(piece_idx, block=False)
+                            break
+                        except queue.Empty:
+                            pass
+                        except queue.Full:
+                            pass
                 connection.close_connection()
-            except queue.Empty:
-                pass
-            except queue.Full:
-                pass
             except TimeoutError:
                 pass
             except ConnectionRefusedError:
