@@ -72,13 +72,12 @@ class Client:
         piece_idx = 0
         while piece_idx < self.torrent.pieces_num :
             try:
-                with self.t_lock:
-                    pieces_done = self.torrent.progress()
-                    if pieces_done == self.torrent.pieces_num:
-                        break
-                    if not self.torrent.bitfield.has_piece(piece_idx):
-                        self.q.put(piece_idx, block=False)
-                    piece_idx += 1
+                pieces_done = self.torrent.progress()
+                if pieces_done == self.torrent.pieces_num:
+                    break
+                if not self.torrent.bitfield.has_piece(piece_idx):
+                    self.q.put(piece_idx, block=False)
+                piece_idx += 1
             except queue.Full:
                 pass
 
@@ -86,15 +85,15 @@ class Client:
         while True:
             try:
                 peer = tuple()
+                pieces_done = self.torrent.progress()
+                status = (pieces_done / self.torrent.pieces_num) * 100
+                size = (os.get_terminal_size().columns * 50) // 100
+                scale = int((size * status)/100)
+                status = "%.2f" % status
+                print("{}[{}{}] {}/{}".format("Downloading ", u"█"*scale, "."*(size - scale), status, 100), end='\r', flush=True)
+                if pieces_done == self.torrent.pieces_num:
+                    break
                 with self.t_lock:
-                    pieces_done = self.torrent.progress()
-                    status = (pieces_done / self.torrent.pieces_num) * 100
-                    size = (os.get_terminal_size().columns * 50) // 100
-                    scale = int((size * status)/100)
-                    status = "%.2f" % status
-                    print("{}[{}{}] {}/{}".format("Downloading ", u"█"*scale, "."*(size - scale), status, 100), end='\r', flush=True)
-                    if pieces_done == self.torrent.pieces_num:
-                        break
                     if not self.peers:
                         self.set_peers()
                     peer = self.peers.pop()
