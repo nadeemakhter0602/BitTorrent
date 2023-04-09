@@ -69,6 +69,12 @@ class Connection:
     def send_not_interested(self):
         return self.send_message(3)
 
+    def send_request(self, piece_idx, piece_offset, block_size):
+        payload = piece_idx.to_bytes(4, 'big')
+        payload += piece_offset.to_bytes(4, 'big')
+        payload += block_size.to_bytes(4, 'big')
+        self.send_message(6, payload)
+
     def receive_bitfield(self):
         length, msg_id, payload = self.receive_message()
         if msg_id != 5:
