@@ -96,7 +96,7 @@ class Client:
                 with self.t_lock:
                     if not self.peers:
                         self.set_peers()
-                    peer = self.peers.pop()
+                peer = self.peers.pop()
                 peer = Peer(peer[1], peer[0])
                 connection = Connection(self, peer, self.torrent)
                 connection.connect_peer()
