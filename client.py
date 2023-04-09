@@ -92,7 +92,7 @@ class Client:
                     size = (os.get_terminal_size().columns * 50) // 100
                     scale = int((size * status)/100)
                     status = "%.2f" % status
-                    print("{}[{}{}] {}/{}".format("Downloading ", "#"*scale, "."*(size - scale), status, 100), end='\r')
+                    print("{}[{}{}] {}/{}".format("Downloading ", u"█"*scale, "."*(size - scale), status, 100), end='\r', flush=True)
                     if pieces_done == self.torrent.pieces_num:
                         break
                     if not self.peers:
