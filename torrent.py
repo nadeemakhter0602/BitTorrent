@@ -30,11 +30,19 @@ class Torrent:
         self.left = self.length
         self.client = client
 
-    def is_completed(self):
+    def validate_piece(self, piece, piece_idx):
+        hashing = hashlib.new('sha1', usedforsecurity=False)
+        hashing.update(piece)
+        if hashing.digest() == self.pieces[piece_idx]:
+            return True
+        return False
+
+    def progress(self):
+        pieces_done = 0
         for piece_idx in range(self.pieces_num):
-            if not self.bitfield.has_piece(piece_idx):
-                return False
-        return True
+            if self.bitfield.has_piece(piece_idx):
+                pieces_done += 1
+        return pieces_done
 
     def create_file(self):
         if not os.path.exists(self.name):
@@ -46,11 +54,21 @@ class Torrent:
         self.file.seek(piece_idx*self.piece_length, 0)
         self.file.write(piece)
 
+    def read_from_file(self, piece_idx):
+        self.file.seek(piece_idx*self.piece_length, 0)
+        piece = self.file.read(self.piece_length)
+        return self.validate_piece(piece, piece_idx)
+
     def create_bitfield(self):
         bits = b'\x00' * (self.pieces_num // 8)
         if not self.pieces_num % 8 == 0:
             bits += b'\x00'
-        return Bitfield(bits)
+        bitfield = Bitfield(bits)
+        if os.path.exists(self.name):
+            for piece_idx in range(self.pieces_num):
+                if self.read_from_file(piece_idx):
+                    bitfield.set_piece(piece_idx)
+        return bitfield
 
     def get_info_hash(self):
         info_hash = self.bencoding.encode(self.torrent_file['info'])
