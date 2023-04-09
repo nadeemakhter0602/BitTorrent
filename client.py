@@ -2,6 +2,7 @@ import secrets
 import multiprocessing
 import threading
 import time
+import os
 import queue
 import hashlib
 from torrent import Torrent
@@ -88,7 +89,10 @@ class Client:
                 with self.t_lock:
                     pieces_done = self.torrent.progress()
                     status = (pieces_done / self.torrent.pieces_num) * 100
-                    print("%.2f/100 Done" % status, end='\r')
+                    size = (os.get_terminal_size().columns * 50) // 100
+                    scale = int((size * status)/100)
+                    status = "%.2f" % status
+                    print("{}[{}{}] {}/{}".format("Downloading ", "#"*scale, "."*(size - scale), status, 100), end='\r')
                     if pieces_done == self.torrent.pieces_num:
                         break
                     if not self.peers:
