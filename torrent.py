@@ -14,6 +14,7 @@ class Torrent:
         self.trackers = self.get_trackers()
         self.length = self.torrent_file['info']['length']
         self.name = self.torrent_file['info']['name']
+        self.file = self.create_file()
         self.piece_length = self.torrent_file['info']['piece length']
         pieces = self.torrent_file['info']['pieces']
         pieces_len = len(pieces)
@@ -29,8 +30,24 @@ class Torrent:
         self.left = self.length
         self.client = client
 
+    def is_completed(self):
+        for piece_idx in range(self.pieces_num):
+            if not self.bitfield.has_piece(piece_idx):
+                return False
+        return True
+
+    def create_file(self):
+        if not os.path.exists(self.name):
+            with open(self.name, 'wb') as fd:
+                fd.write(b'')
+        return open(self.name, 'rb+')
+
+    def write_to_file(self, piece_idx, piece):
+        self.file.seek(piece_idx*self.piece_length, 0)
+        self.file.write(piece)
+
     def create_bitfield(self):
-        bits = b'\x00' * self.pieces_num // 8
+        bits = b'\x00' * (self.pieces_num // 8)
         if not self.pieces_num % 8 == 0:
             bits += b'\x00'
         return Bitfield(bits)
