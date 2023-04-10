@@ -45,7 +45,7 @@ class Connection:
         if not self.handshake_done:
             raise Exception("No handshake completed with peer")
         message = self.serialize_message(msg_id, payload)
-        self.conn.send(message)
+        self.conn.sendall(message)
         return True
 
     def receive_message(self):
@@ -114,7 +114,7 @@ class Connection:
         if not self.is_connected:
             raise Exception("No peer connected")
         handshake = self.serialize_handshake()
-        self.conn.send(handshake)
+        self.conn.sendall(handshake)
         deserialized = self.deserialize_handshake()
         protocol_identifier, pstr, reserved_bytes, info_hash, peer_id = deserialized
         self.peer.peer_id = peer_id
