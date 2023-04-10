@@ -10,8 +10,8 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-f', '--filepath', help="Path to the .torrent file", type=str)
 parser.add_argument('-p', '--port', help="Port number to run the service at", type=int, default=6881)
-parser.add_argument('-t', '--threads', help="Number of threads to use", type=int, default=50)
-parser.add_argument('-r', '--requests-per-peer', help="Piece requests to send for each peer", type=int, default=5)
+parser.add_argument('-t', '--threads', help="Number of threads to use", type=int, default=10)
+parser.add_argument('-r', '--requests-per-peer', help="Piece requests to send for each peer", type=int, default=10)
 
 args = parser.parse_args()
 
