@@ -43,7 +43,8 @@ class Torrent:
         for piece_idx in range(self.pieces_num):
             if self.bitfield.has_piece(piece_idx):
                 pieces_done += 1
-        return pieces_done
+        status = (pieces_done / self.pieces_num) * 100
+        return pieces_done, status
 
     def create_file(self):
         if not os.path.exists(self.name):
