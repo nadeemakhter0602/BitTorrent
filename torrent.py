@@ -22,6 +22,7 @@ class Torrent:
                        for start in range(0, pieces_len, 20)]
         self.pieces_num = len(self.pieces)
         self.validate_piece_length()
+        self.last_piece_length = self.length % self.piece_length
         self.bitfield = self.create_bitfield()
         self.uploaded = 0
         self.downloaded = 0
