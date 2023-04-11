@@ -2,7 +2,7 @@ import hashlib
 import os
 from bencoding import BEncoding
 import traceback
-import requests
+from urllib import request, parse
 from bitfield import Bitfield
 
 
@@ -126,12 +126,15 @@ class Torrent:
             'event': event,
             'compact': compact
         }
+        query_params = parse.urlencode(query_params)
         try:
             responses = []
             for tracker in trackers:
-                response = requests.get(tracker, params=query_params)
-                response = self.bencoding.decode(response.content)
-                responses.append(response)
+                tracker = tracker.decode() + "?%s" % query_params
+                with request.urlopen(tracker) as response: #nosec
+                    response = response.read()
+                    response = self.bencoding.decode(response)
+                    responses.append(response)
             return responses
         except Exception as e:
             print("Announce failed due to error :")
