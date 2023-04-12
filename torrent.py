@@ -68,6 +68,8 @@ class Torrent:
         bitfield = Bitfield(bits)
         if os.path.exists(self.name):
             for piece_idx in range(self.pieces_num):
+                if self.read_from_file(piece_idx) and piece_idx == 0:
+                    print("File exists, checking integrity and updating...")
                 if self.read_from_file(piece_idx):
                     bitfield.set_piece(piece_idx)
         return bitfield
